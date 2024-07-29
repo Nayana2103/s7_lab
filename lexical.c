@@ -1,3 +1,5 @@
+Design and implement a lexical analyzer using C language to recognize all valid tokens in the input program. The lexical analyzer should ignore redundant spaces, tabs and newlines. It should also ignore comments. 
+
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
