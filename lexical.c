@@ -1,5 +1,4 @@
-Design and implement a lexical analyzer using C language to recognize all valid tokens in the input program. The lexical analyzer should ignore redundant spaces, tabs and newlines. It should also ignore comments. 
-
+//Design and implement a lexical analyzer using C language to recognize all valid tokens in the input program. The lexical analyzer should ignore redundant spaces, tabs and newlines. It should also ignore comments. 
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -12,8 +11,8 @@ int main() {
     char ch, str[20];       // Variable to hold the current character and a buffer for strings
 
     // Open the input file in read mode and the output file in write mode
-    input = fopen("pgm.txt", "r");
-    output = fopen("outputnew.txt", "w");
+    input = fopen("input.txt", "r");
+    output = fopen("output.txt", "w");
 
     // Check if input file was opened successfully
     if (input == NULL) {
@@ -33,9 +32,16 @@ int main() {
     fprintf(output, "Line no. \t Token no. \t\t Token \t\t Lexeme\n\n");
 
     // Read characters from the input file one by one
-    while (!feof(input)) {
-        ch = fgetc(input); // Get the next character from the input file
+    while ((ch = fgetc(input)) != EOF) { // Change from while (!feof(input)) to while ((ch = fgetc(input)) != EOF)
         
+        // Handle preprocessor directives
+        if (ch == '#') {
+            // Skip the rest of the line
+            while ((ch = fgetc(input)) != '\n' && ch != EOF);
+            l++; // Increment line number after skipping the directive line
+            continue; // Skip to the next character
+        }
+
         // Skip whitespace characters and count new lines
         if (isspace(ch)) {
             if (ch == '\n') {
@@ -69,6 +75,8 @@ int main() {
                     if (ch == '*') {
                         if ((ch = fgetc(input)) == '/') { // Check for end of multi-line comment
                             break;
+                        } else {
+                            ungetc(ch, input); // Put back the character if it's not the end of the comment
                         }
                     }
                     if (ch == EOF) { // End of file encountered
@@ -97,18 +105,17 @@ int main() {
         else if (isalpha(ch)) {
             int i = 0;
             str[i++] = ch; // Start building the string with the current character
-            ch = fgetc(input); // Get the next character
-
-            // Continue building the string if the next character is alphanumeric
-            while (isalnum(ch)) {
-                str[i++] = ch;
-                ch = fgetc(input);
+            while (isalnum((ch = fgetc(input))) || ch == '_') {
+                if (i < sizeof(str) - 1) { // Ensure buffer does not overflow
+                    str[i++] = ch;
+                }
             }
             str[i] = '\0'; // Null-terminate the string
             ungetc(ch, input); // Put back the character if it's not part of the identifier
 
+            // Check if the string is a keyword
             int flag = 0;
-            for (j = 0; j < 6; j++) { // Check if the string is a keyword
+            for (j = 0; j < 6; j++) {
                 if (strcmp(str, keyword[j]) == 0) {
                     flag = 1; // Set flag if it's a keyword
                     break;
@@ -128,3 +135,6 @@ int main() {
     fclose(output);
     return 0;
 }
+
+          
+   
